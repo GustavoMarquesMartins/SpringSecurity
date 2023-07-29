@@ -1,0 +1,1 @@
+alter table usuarios change password senha varchar(155) not null;
