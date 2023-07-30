@@ -1,4 +1,4 @@
-package alura.com.br.Security.Security;
+package alura.com.br.Security.Security.Autentication;
 
 
 import alura.com.br.Security.Security.Users.UsuarioRepository;
@@ -12,10 +12,9 @@ import org.springframework.stereotype.Service;
 public class AutenticacaoServico implements UserDetailsService {
 
     @Autowired
-    private UsuarioRepository repository;
-
+    UsuarioRepository usuarioRepository;
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return repository.findByLogin(username);
+    public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException {
+        return usuarioRepository.findByLogin(login);
     }
 }

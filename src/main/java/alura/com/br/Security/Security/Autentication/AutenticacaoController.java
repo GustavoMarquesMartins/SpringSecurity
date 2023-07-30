@@ -1,7 +1,9 @@
-package alura.com.br.Security.Security;
+package alura.com.br.Security.Security.Autentication;
 
 
-import alura.com.br.Security.Security.Users.UsuarioAutentificacao;
+import alura.com.br.Security.Security.Token.TokenService;
+import alura.com.br.Security.Security.Users.Usuario;
+import alura.com.br.Security.Security.Users.UsuarioAutentificacaoDTO;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,12 +20,13 @@ public class AutenticacaoController {
 
     @Autowired
     private AuthenticationManager manager;
+    @Autowired
+    private TokenService tokenService;
 
     @PostMapping
-    public ResponseEntity efetuarLogin(@RequestBody @Valid UsuarioAutentificacao dados) {
+    public ResponseEntity efetuarLogin(@RequestBody @Valid UsuarioAutentificacaoDTO dados) {
         var token = new UsernamePasswordAuthenticationToken(dados.login(), dados.senha());
         var authentication = manager.authenticate(token);
-
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(tokenService.gerarToken((Usuario) authentication.getPrincipal()));
     }
 }
