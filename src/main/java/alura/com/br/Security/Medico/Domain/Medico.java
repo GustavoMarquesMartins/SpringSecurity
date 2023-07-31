@@ -1,6 +1,7 @@
 package alura.com.br.Security.Medico.Domain;
 
 
+import alura.com.br.Security.Medico.DTO.MedicoDadosAtualizacaoDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,4 +25,16 @@ public class Medico {
 
     private Boolean status = true;
 
+    public void tornarInativo() {
+        this.status = false;
+    }
+
+    public void atualizar(MedicoDadosAtualizacaoDTO medicoDadosAtualizacaoDTO) {
+        if (medicoDadosAtualizacaoDTO.nome() != null) {
+            this.nome = medicoDadosAtualizacaoDTO.nome();
+        }
+        if (medicoDadosAtualizacaoDTO.email() != null) {
+            this.email = medicoDadosAtualizacaoDTO.email();
+        }
+    }
 }
