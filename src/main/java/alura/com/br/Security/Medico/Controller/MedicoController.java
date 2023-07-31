@@ -1,5 +1,6 @@
 package alura.com.br.Security.Medico.Controller;
 
+import alura.com.br.Security.ExceptionHandling.DuplicidadeException;
 import alura.com.br.Security.ExceptionHandling.MedicoNotFoundException;
 import alura.com.br.Security.Medico.DTO.MedicoDadosAtualizacaoDTO;
 import alura.com.br.Security.Medico.DTO.MedicoRequestDTO;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponents;
@@ -34,7 +36,7 @@ public class MedicoController {
     private ModelMapper modelMapper;
 
     @PostMapping
-    public ResponseEntity salvar(@RequestBody @Valid MedicoRequestDTO medicoRequestDTO, UriComponentsBuilder uriComponentsBuilder)throws Exception{
+    public ResponseEntity salvar(@RequestBody @Valid MedicoRequestDTO medicoRequestDTO, UriComponentsBuilder uriComponentsBuilder) throws DuplicidadeException {
         var medico = medicoServico.salvar(medicoRequestDTO);
         var uri = uriComponentsBuilder.path("/medico/{id}").buildAndExpand(medico.getId()).toUri();
         return ResponseEntity.created(uri).body(new MedicoResponseDTO(medico));
@@ -46,19 +48,20 @@ public class MedicoController {
     }
 
     @DeleteMapping("/{id}")
+    @Secured("ROLE_ADMIN")
     public ResponseEntity deletar(@PathVariable Long id) throws MedicoNotFoundException {
         medicoServico.tornarInativo(id);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping
-    public ResponseEntity atualizar(@RequestBody @Valid MedicoDadosAtualizacaoDTO medicoDadosAtualizacaoDTO) {
+    public ResponseEntity atualizar(@RequestBody @Valid MedicoDadosAtualizacaoDTO medicoDadosAtualizacaoDTO) throws MedicoNotFoundException {
         var dto = medicoServico.atualizar(medicoDadosAtualizacaoDTO);
         return ResponseEntity.ok(dto);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity medicoDetalhado(@PathVariable Long id) {
+    public ResponseEntity medicoDetalhado(@PathVariable Long id) throws MedicoNotFoundException {
         var dto = medicoServico.medicoDetalhado(id);
         return ResponseEntity.ok(dto);
     }

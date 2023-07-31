@@ -1,5 +1,6 @@
 package alura.com.br.Security.Medico.Servico;
 
+import alura.com.br.Security.ExceptionHandling.DuplicidadeException;
 import alura.com.br.Security.ExceptionHandling.MedicoNotFoundException;
 import alura.com.br.Security.Medico.DTO.MedicoDadosAtualizacaoDTO;
 import alura.com.br.Security.Medico.DTO.MedicoRequestDTO;
@@ -31,12 +32,10 @@ public class MedicoServico {
     private ModelMapper modelMapper;
 
     @Transactional
-    public Medico salvar(MedicoRequestDTO medicoRequestDTO) throws Exception {
+    public Medico salvar(MedicoRequestDTO medicoRequestDTO) throws DuplicidadeException {
         validarCamposUnique(medicoRequestDTO);
         return medicoRepository.save(modelMapper.map(medicoRequestDTO, Medico.class));
     }
-
-
     @Transactional
     public void tornarInativo(Long id) throws MedicoNotFoundException {
         var medico = medicoRepository.findById(id).orElseThrow(() -> new MedicoNotFoundException("Médico com o id : " + id + " não foi encontrado ", List.of("id")));
@@ -47,22 +46,22 @@ public class MedicoServico {
         return medicoRepository.findAllByStatusTrue(pageable).map(MedicoResponseDTO::new);
     }
 
-    public MedicoResponseDTO medicoDetalhado(Long id) {
-        var medico = medicoRepository.findById(id).orElseThrow(() -> new RuntimeException(" O id inserido não corresponse a um médico valido"));
+    public MedicoResponseDTO medicoDetalhado(Long id)throws MedicoNotFoundException {
+        var medico = medicoRepository.findById(id).orElseThrow(() -> new MedicoNotFoundException(" O id inserido não corresponse a um médico valido",List.of("id")));
         return new MedicoResponseDTO(medico);
     }
 
     @Transactional
-    public MedicoResponseDTO atualizar(MedicoDadosAtualizacaoDTO medicoDadosAtualizacaoDTO) {
-        var medico = medicoRepository.findById(medicoDadosAtualizacaoDTO.id()).orElseThrow(() -> new RuntimeException(" O id inserido não corresponse a um médico valido "));
+    public MedicoResponseDTO atualizar(MedicoDadosAtualizacaoDTO medicoDadosAtualizacaoDTO)  throws MedicoNotFoundException {
+        var medico = medicoRepository.findById(medicoDadosAtualizacaoDTO.id()).orElseThrow(() -> new MedicoNotFoundException(" O id inserido não corresponse a um médico valido",List.of("id")));
         medico.atualizar(medicoDadosAtualizacaoDTO);
         return new MedicoResponseDTO(medico);
     }
 
-    private void validarCamposUnique(MedicoRequestDTO medicoRequestDTO) throws Exception {
+    private void validarCamposUnique(MedicoRequestDTO medicoRequestDTO) throws DuplicidadeException {
         var medico = medicoRepository.findByEmail(medicoRequestDTO.email());
         if (medico.isPresent()) {
-            throw new Exception("Usuario ja com email cadastrado");
+            throw new DuplicidadeException(" E-mail já cadastrado ! ",List.of("email"));
         }
     }
 }
